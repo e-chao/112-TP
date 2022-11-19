@@ -4,35 +4,20 @@ from dot import Dot
 from score import Score
 from button import Button
 
+#Switching screen code inspired off of the 112 course notes
+
 #Main menu
 def mainMenu_redrawAll(app, canvas):
-    #sixshot button dimensions
-    sixshotButtonLeft = app.sixshotButton.cx - app.sixshotButton.length
-    sixshotButtonRight = app.sixshotButton.cx + app.sixshotButton.length
-    sixshotButtonTop = app.sixshotButton.cy - app.sixshotButton.height
-    sixshotButtonBottom = app.sixshotButton.cy + app.sixshotButton.height
-    #strafetrack button dimensions
-    strafetrackButtonLeft = (app.strafetrackButton.cx - 
-    app.strafetrackButton.length)
-    strafetrackButtonRight = (app.strafetrackButton.cx + 
-    app.strafetrackButton.length)
-    strafetrackButtonTop = (app.strafetrackButton.cy - 
-    app.strafetrackButton.height)
-    strafetrackButtonBottom = (app.strafetrackButton.cy + 
-    app.strafetrackButton.height)
-    #gridshot button dimensions
-    gridshotButtonLeft = app.gridshotButton.cx - app.sixshotButton.length
-    gridshotButtonRight = app.gridshotButton.cx + app.sixshotButton.length
-    gridshotButtonTop = app.gridshotButton.cy - app.sixshotButton.height
-    gridshotButtonBottom = app.gridshotButton.cy + app.sixshotButton.height
     #creating buttons
-    canvas.create_rectangle(gridshotButtonLeft, gridshotButtonTop,
-    gridshotButtonRight, gridshotButtonBottom, fill = app.gridshotButton.color)
-    canvas.create_rectangle(strafetrackButtonLeft, strafetrackButtonTop,
-    strafetrackButtonRight, strafetrackButtonBottom, 
-    fill = app.strafetrackButton.color)
-    canvas.create_rectangle(sixshotButtonLeft, sixshotButtonTop, 
-    sixshotButtonRight, sixshotButtonBottom, fill = app.sixshotButton.color)
+    canvas.create_rectangle(app.gridshotButton.left, app.gridshotButton.top,
+    app.gridshotButton.right, app.gridshotButton.bottom, 
+    fill = app.gridshotButton.color)
+    canvas.create_rectangle(app.strafetrackButton.left, 
+    app.strafetrackButton.top, app.strafetrackButton.right, 
+    app.strafetrackButton.bottom, fill = app.strafetrackButton.color)
+    canvas.create_rectangle(app.sixshotButton.left, app.sixshotButton.top, 
+    app.sixshotButton.right, app.sixshotButton.bottom, 
+    fill = app.sixshotButton.color)
     canvas.create_text(app.gridshotButton.cx, app.gridshotButton.cy,
     text = 'Gridshot', font = 'Arial 28 bold')
     canvas.create_text(app.strafetrackButton.cx, app.strafetrackButton.cy,
@@ -68,21 +53,14 @@ def mainMenu_keyPressed(app, event):
 
 #Escape menu
 def escapeMenu_redrawAll(app, canvas):
-    resumeButtonLeft = app.resumeButton.cx - app.resumeButton.length
-    resumeButtonRight = app.resumeButton.cx + app.resumeButton.length
-    resumeButtonTop = app.resumeButton.cy - app.resumeButton.height
-    resumeButtonBottom = app.resumeButton.cy + app.resumeButton.height
-    homeButtonLeft = app.homeButton.cx - app.homeButton.length
-    homeButtonRight = app.homeButton.cx + app.homeButton.length
-    homeButtonTop = app.homeButton.cy - app.homeButton.height
-    homeButtonBottom = app.homeButton.cy + app.homeButton.height
     if app.oldMode != 'mainMenu':
-        canvas.create_rectangle(resumeButtonLeft, resumeButtonTop,
-        resumeButtonRight, resumeButtonBottom, fill = app.resumeButton.color)
+        canvas.create_rectangle(app.resumeButton.left, app.resumeButton.top,
+        app.resumeButton.right, app.resumeButton.bottom, 
+        fill = app.resumeButton.color)
         canvas.create_text(app.resumeButton.cx, app.resumeButton.cy, 
         text = 'Resume', font = 'Arial 28 bold')
-    canvas.create_rectangle(homeButtonLeft, homeButtonTop,
-    homeButtonRight, homeButtonBottom, fill = app.homeButton.color)
+    canvas.create_rectangle(app.homeButton.left, app.homeButton.top,
+    app.homeButton.right, app.homeButton.bottom, fill = app.homeButton.color)
     canvas.create_text(app.homeButton.cx, app.homeButton.cy,
     text = 'Home', font = 'Arial 28 bold')
 
@@ -186,15 +164,51 @@ def strafetrack_redrawAll(app, canvas):
     text=f'Score: {app.strafetrackScore.score}',font='Arial 28 bold')
     canvas.create_text(app.width//2, 60, text=f'{60 - app.gameTimePast//1000}')
     if app.gameStarted == True:
-        cx, cy, r = app.strafetrackDot.cx, app.strafetrackDot.cy, 
-        app.strafetrackDot.r
+        cx, cy, r = (app.strafetrackDot.cx, app.strafetrackDot.cy, 
+        app.strafetrackDot.radius)
         canvas.create_oval(cx+r, cy+r, cx-r, cy-r, 
         fill=app.strafetrackDot.color)
 
 def strafetrack_timerFired(app):
+    app.timePast += app.timerDelay
+    if app.timePast >= 3000:
+        app.gameStarted = True
+    if app.gameStarted == True:
+        strafetrack_moveDot(app)
+        app.gameTimePast += app.timerDelay
+        app.timeSinceLastSwitch += app.timerDelay
+        app.timeAliveDot += app.timerDelay
+        if app.timeSinceLastSwitch >= 1000:
+            app.timeSinceLastSwitch = 0
+            oldDirection = app.dotDirection
+            app.dotDirection = random.randint(0,1)
+            if oldDirection == app.dotDirection:
+                app.oldDirectionCounter += 1
+        elif app.timeSinceLastSwitch >= 1000 and app.oldDirectionCounter > 2: 
+            app.timeSinceLastSwitch = 0
+            app.oldDirectionCounter = 0
+            app.dotDirection = (app.dotDirection + 1) % 2
+        elif app.timeAliveDot >= 8000:
+            app.timeAliveDot = 0
+            app.strafetrackDot = strafetrack_generateDot(app)
+
+def strafetrack_mousePresseded(app, event):
+    x, y = event.x, event.y
     pass
 
-def strafetrack_mouseDragged(app, event):
+def strafetrack_moveDot(app):
+    if app.dotDirection == 0:
+        app.dotDx = -1 * app.strafetrackDot.radius
+        app.strafetrackDot.cx += app.dotDx
+        if app.strafetrackDot.cx < app.margin+2*app.gridshotR:
+            app.strafetrackDot.cx -= app.dotDx
+            app.dotDx *= -1
+    else:
+        app.dotDx = app.strafetrackDot.radius
+        app.strafetrackDot.cx += app.dotDx
+        if app.strafetrackDot.cx > app.width-app.margin-2*app.gridshotR:
+            app.strafetrackDot.cx -= app.dotDx
+            app.dotDx *= -1
     pass
 
 def strafetrack_generateDot(app):
@@ -204,6 +218,7 @@ def strafetrack_generateDot(app):
     app.height-app.margin-2*app.gridshotR)
     radius = random.randint(app.r, app.gridshotR)
     dot = Dot(cx, cy, radius)
+    return dot
 
 #Sixshot
 def sixshot_timerFired(app):
@@ -300,24 +315,15 @@ def gameOver_redrawAll(app, canvas):
         text= 
         f'Accuracy: {math.floor((app.gridshotHits/app.gridshotShots)*100)}%',
         font='Arial 36 bold')
-    #create replay button dimensions
-    replayButtonLeft = app.resumeButton.cx - app.resumeButton.length
-    replayButtonRight = app.resumeButton.cx + app.resumeButton.length
-    replayButtonTop = app.resumeButton.cy - app.resumeButton.height
-    replayButtonBottom = app.resumeButton.cy + app.resumeButton.height
-    #create home button dimensions
-    homeButtonLeft = app.homeButton.cx - app.homeButton.length
-    homeButtonRight = app.homeButton.cx + app.homeButton.length
-    homeButtonTop = app.homeButton.cy - app.homeButton.height
-    homeButtonBottom = app.homeButton.cy + app.homeButton.height
     #create the replay button
-    canvas.create_rectangle(replayButtonLeft, replayButtonTop,
-    replayButtonRight, replayButtonBottom, fill = app.resumeButton.color)
+    canvas.create_rectangle(app.resumeButton.left, app.resumeButton.top,
+        app.resumeButton.right, app.resumeButton.bottom, 
+        fill = app.resumeButton.color)
     canvas.create_text(app.resumeButton.cx, app.resumeButton.cy, 
     text = 'Replay', font = 'Arial 28 bold')
-    #create the home button2
-    canvas.create_rectangle(homeButtonLeft, homeButtonTop,
-    homeButtonRight, homeButtonBottom, fill = app.homeButton.color)
+    #create the home button
+    canvas.create_rectangle(app.homeButton.left, app.homeButton.top,
+    app.homeButton.right, app.homeButton.bottom, fill = app.homeButton.color)
     canvas.create_text(app.homeButton.cx, app.homeButton.cy,
     text = 'Home', font = 'Arial 28 bold')
     #when the user can play again
@@ -362,7 +368,8 @@ def appStarted(app):
     app.catchphraseList = ['We have the meats!', 'You will love this!',
     'Did you watch the dev hour for this?', 'Haha dev hour deez nuts',
     'you will not believe your eyes', 'I heckin love TenZ', 
-    'Technoblade never dies']
+    'Technoblade never dies','The greatest thing since sliced bread',
+    'hop on fortnite!','u gotta be trolling']
     app.catchphrase = random.choice(app.catchphraseList)
     #Buttons
     app.gridshotButton = Button(app.width//2, app.height//3, app.width//4,
@@ -393,9 +400,15 @@ def appStarted(app):
         app.gridshotDotsSet.add(currentDot)
     #strafetrack
     app.strafetrackDot = strafetrack_generateDot(app)
+    app.strafetrackScore = Score()
+    app.timeSinceLastSwitch = 0
+    app.timeAliveDot = 0
+    app.dotDirection = random.randint(0,1)
+    app.dotDx = 0
+    app.oldDirectionCounter = 0
     #sixshot
     app.sixshotScore = Score()
-    app.timerDelay = 6
+    app.timerDelay = 50
     app.timePast = 0
     app.gameTimePast = 0
     app.sixshotHits = 0

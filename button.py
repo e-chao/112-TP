@@ -5,7 +5,10 @@ class Button():
         self.cx, self.cy = cx, cy
         self.length, self.height = length, height
         self.color = color
-
+        self.left = self.cx - self.length
+        self.right = self.cx + self.length
+        self.top = self.cy - self.height
+        self.bottom = self.cy + self.height
 
 
 
