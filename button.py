@@ -10,5 +10,11 @@ class Button():
         self.top = self.cy - self.height
         self.bottom = self.cy + self.height
 
-
-
+    def pressed(self, mouseX, mouseY):
+        if (mouseX >= self.cx - self.length and
+    mouseX <= self.cx + self.length and
+    mouseY >= self.cy - self.height and
+    mouseY <= self.cy + self.height):
+            return True
+        else:
+            return False

@@ -4,17 +4,17 @@ class Score():
     def __init__(self):
         self.score = 0
         self.comboStreak = 0
+        self.originalScoreIncrement = 75
         self.scoreIncrement = 75
 
     def returnScore(self):
         return self.score
 
-    def increaseCombo(self):
-        self.comboStreak += 1
-
     def incrementScore(self):
-        if self.scoreIncrement <= 1000:
-            self.scoreIncrement *= self.comboStreak
+        if self.scoreIncrement <= 750:
+            self.comboStreak += 1
+            self.scoreIncrement = self.comboStreak*self.originalScoreIncrement
+        self.score += self.scoreIncrement
 
     def resetScoreIncrement(self):
         self.scoreIncrement = 75

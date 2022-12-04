@@ -9,6 +9,9 @@ from cube import Cube
 #Getting user input from 112 course notes
 #Gif code from 112 course notes, gif from 
 #https://tenor.com/view/fortnite-default-dance-gif-13330926
+#Converting to 2d from the 3D graphics mini-lecture
+#Matrix multiplication and rotation matrices function from Yuta A.'s YouTube 
+#Video: 3D Rotation & Projection using Python/Pygame
 
 #Main menu
 def mainMenu_redrawAll(app, canvas):
@@ -27,7 +30,6 @@ def mainMenu_redrawAll(app, canvas):
     text = f'{app.catchphrase}', font = 'Arial 16')
     canvas.create_text(app.helpButton.cx, app.helpButton.cy,
     text = 'Help', font = 'Arial 28 bold')
-    #draws the GIF
     if app.gifsOn == True:
         photoImage1 = app.spritePhotoImages[app.spriteCounter]
         canvas.create_image(app.width//10, app.height//2, image=photoImage1)
@@ -273,6 +275,8 @@ def sixshot_timerFired(app):
             app.mode = 'gameOver'
 
 def sixshot_keyPressed(app, event):
+    lookX = -1*app.targetZDis*math.tan(app.lookAngleY) 
+    lookY = app.targetZDis*math.tan(app.lookAngleX) 
     if event.key == 'a':
         if app.drawnRoom.cx < app.drawnRoom.length/2:
             #update the points after updating cx in both room and target lists
@@ -309,7 +313,7 @@ def sixshot_keyPressed(app, event):
     #rotateCube is a non-destructive function that returns rotated points
     elif event.key == 'Up':
         #rotate down
-        if app.lookAngleX > -.44:
+        if lookY > -app.room.length/2:
             app.lookAngleX -= .01*app.sens
             app.drawnRoom.points = rotateCube(app.room.points, 
             app.lookAngleX, app.lookAngleY)
@@ -319,7 +323,7 @@ def sixshot_keyPressed(app, event):
                 app.lookAngleX, app.lookAngleY)
     elif event.key == 'Down':
         #rotate up
-        if app.lookAngleX < .44:
+        if lookY < app.room.length/2:
             app.lookAngleX += .01*app.sens
             app.drawnRoom.points = rotateCube(app.room.points, 
             app.lookAngleX, app.lookAngleY)
@@ -329,7 +333,7 @@ def sixshot_keyPressed(app, event):
                 app.lookAngleX, app.lookAngleY)
     elif event.key == 'Left':
         #rotate right
-        if app.lookAngleY < .44:
+        if lookX > -app.room.length/2:
             app.lookAngleY += .01*app.sens
             app.drawnRoom.points = rotateCube(app.room.points, 
             app.lookAngleX, app.lookAngleY)
@@ -339,7 +343,7 @@ def sixshot_keyPressed(app, event):
                 app.lookAngleX, app.lookAngleY)
     elif event.key == 'Right':
         #rotate left
-        if app.lookAngleY > -.44:
+        if lookX < app.room.length/2:
             app.lookAngleY -= .01*app.sens
             app.drawnRoom.points = rotateCube(app.room.points, 
             app.lookAngleX, app.lookAngleY)
@@ -401,9 +405,6 @@ def sixshot_missedCounter(app, mouseX, mouseY):
         elif y >= mouseY + 2*app.targetLength2d:
             app.sixshotMissedDown += 1
 
-
-#Matrix multiplication and rotation matrices function from Yuta A.'s YouTube 
-#Video: 3D Rotation & Projection using Python/Pygame
 def rotateCube(pointsList, angle_x, angle_y):
     newPointsList = copy.deepcopy(pointsList)
     for point in newPointsList:
@@ -631,6 +632,7 @@ def appStarted(app):
     #Sixshot
     app.room = Cube(0, 0, 100, 100)
     app.lookAngleX, app.lookAngleY = 0, 0
+    app.targetZDis = 70
     app.sixshotScore = Score()
     app.sixshotScores = []
     app.sixshotHits = 0

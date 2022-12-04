@@ -9,6 +9,9 @@ from cube import Cube
 #Getting user input from 112 course notes
 #Gif code from 112 course notes, gif from 
 #https://tenor.com/view/fortnite-default-dance-gif-13330926
+#Converting to 2d from the 3D graphics mini-lecture
+#Matrix multiplication and rotation matrices function from Yuta A.'s YouTube 
+#Video: 3D Rotation & Projection using Python/Pygame
 
 #Main menu
 def mainMenu_redrawAll(app, canvas):
@@ -27,7 +30,6 @@ def mainMenu_redrawAll(app, canvas):
     text = f'{app.catchphrase}', font = 'Arial 16')
     canvas.create_text(app.helpButton.cx, app.helpButton.cy,
     text = 'Help', font = 'Arial 28 bold')
-    #draws the GIF
     if app.gifsOn == True:
         photoImage1 = app.spritePhotoImages[app.spriteCounter]
         canvas.create_image(app.width//10, app.height//2, image=photoImage1)
@@ -268,7 +270,7 @@ def sixshot_timerFired(app):
             app.height//2)
             app.targets2d[i] = target2d
         #end game, switch to game over
-        if app.gameTimePast >= 6000:
+        if app.gameTimePast >= 15000:
             app.oldMode = app.mode
             app.mode = 'gameOver'
 
@@ -378,6 +380,24 @@ def sixshot_mousePressed(app, event):
         app.sixshotScore.resetScoreIncrement()
         app.sixshotShots += 1
 
+def sixshot_mouseMoved(app, event):
+    dx = event.x - app.oldX
+    dy = event.y - app.oldY
+    app.oldX, app.oldY = event.x, event.y
+    oldAngleX, oldAngleY = app.lookAngleX, app.lookAngleY
+    app.lookAngleX += .005*dy*app.sens
+    app.lookAngleY -= .005*dx*app.sens
+    if (app.lookAngleX > -.44 and app.lookAngleX < .44 and app.lookAngleY > -.44
+    and app.lookAngleY < .44):
+        app.drawnRoom.points = rotateCube(app.room.points, 
+        app.lookAngleX, app.lookAngleY)
+        for target in app.targets:
+            i = app.targets.index(target)
+            app.drawnTargets[i].points = rotateCube(target.points, 
+            app.lookAngleX, app.lookAngleY)    
+    else:
+        app.lookAngleX, app.lookAngleY = oldAngleX, oldAngleY
+
 #uses trig to find the location that the camera is looking at
 def targetClicked(app, target):
     lookX = -1*target.cz*math.tan(app.lookAngleY) 
@@ -401,9 +421,6 @@ def sixshot_missedCounter(app, mouseX, mouseY):
         elif y >= mouseY + 2*app.targetLength2d:
             app.sixshotMissedDown += 1
 
-
-#Matrix multiplication and rotation matrices function from Yuta A.'s YouTube 
-#Video: 3D Rotation & Projection using Python/Pygame
 def rotateCube(pointsList, angle_x, angle_y):
     newPointsList = copy.deepcopy(pointsList)
     for point in newPointsList:
@@ -627,10 +644,11 @@ def appStarted(app):
     app.gifsButton = Button(app.width//2, app.height//3, app.width//4,
     app.height//16, "gray")
     #settings
-    app.sens = 1
+    app.sens = .3
     #Sixshot
     app.room = Cube(0, 0, 100, 100)
     app.lookAngleX, app.lookAngleY = 0, 0
+    app.oldX, app.oldY = app.width/2, app.height/2
     app.sixshotScore = Score()
     app.sixshotScores = []
     app.sixshotHits = 0
