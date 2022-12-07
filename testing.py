@@ -6,8 +6,6 @@ from inputRect import InputRect
 import math, random, copy, time
 from pygame.locals import *
 
-#Unfortunately the default dance GIF did not make it into the final version :(
-
 #Most drawing and display code was learned from https://realpython.com/pygame-a-primer/ 
 #and pygame.org
 
@@ -101,22 +99,22 @@ def main(sens, targetColor, crosshairColor, crosshairRadius):
     running = True
     pygame.event.set_grab(False)
     pygame.mouse.set_visible(True)
-    #Music commented out for 10MB requirement
+    #Music
     #mcMusic from https://www.youtube.com/watch?v=_3ngiSxVCBs
     #fortnite og music from https://www.youtube.com/watch?v=IpPdbU1cjVE
     #valorant og music from https://www.youtube.com/watch?v=rhQ7RTXrc6s
     #ALL MUSIC CREDIT ALSO GOES TO THE ORIGINAL GAME (MINECRAFT, FORTNITE, VALORANT)
-    # musicChoice = random.randint(0,2)
-    # if musicChoice == 0:
-    #     pygame.mixer.music.load("sweden.wav")
-    #     pygame.mixer.music.set_volume(1.2)
-    # elif musicChoice == 1:
-    #     pygame.mixer.music.load("fortnite og.wav")
-    #     pygame.mixer.music.set_volume(.3)
-    # else:
-    #     pygame.mixer.music.load("valorant og.wav")
-    #     pygame.mixer.music.set_volume(.3)
-    # pygame.mixer.music.play(-1)
+    musicChoice = random.randint(0,2)
+    if musicChoice == 0:
+        pygame.mixer.music.load("sweden.wav")
+        pygame.mixer.music.set_volume(1.2)
+    elif musicChoice == 1:
+        pygame.mixer.music.load("fortnite og.wav")
+        pygame.mixer.music.set_volume(.3)
+    else:
+        pygame.mixer.music.load("valorant og.wav")
+        pygame.mixer.music.set_volume(.3)
+    pygame.mixer.music.play(-1)
     catchphrase = random.choice(catchphrases)
     while running:
         catchphraseText = font.render(catchphrase, False, (0,0,0))
@@ -124,22 +122,22 @@ def main(sens, targetColor, crosshairColor, crosshairRadius):
         screen.fill((100,255,255))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                # pygame.mixer.music.stop()
+                pygame.mixer.music.stop()
                 running = False
             elif event.type == pygame.KEYDOWN:
                 #opens escape menu
                 if event.key == pygame.K_ESCAPE:
-                    # pygame.mixer.music.stop()
+                    pygame.mixer.music.stop()
                     escape(sens, targetColor, crosshairColor, crosshairRadius)
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 #changes to game menu
                 if playButton.pressed():
-                    # pygame.mixer.music.stop()
+                    pygame.mixer.music.stop()
                     buttonSound.play()
                     sixshot(sens, targetColor, crosshairColor, crosshairRadius)
                 #quits the game
                 elif quitButton.pressed():
-                    # pygame.mixer.music.stop()
+                    pygame.mixer.music.stop()
                     buttonSound.play()
                     running = False
         screen.blit(catchphraseText, cpRect)
@@ -182,7 +180,7 @@ def escape(sens, targetColor, crosshairColor, crosshairRadius):
                         crosshairRadius)
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    running = False
+                    main(sens, targetColor, crosshairColor, crosshairRadius)
         #Buttons
         screen.blit(quitButton.rect, (quitButton.left, 
         quitButton.top))
@@ -310,6 +308,7 @@ def settings(sens, targetColor, crosshairColor, crosshairRadius):
                             changed = True
                             break
                     if not changed:
+                        buttonSound.play()
                         escape(sens, targetColor, crosshairColor, 
                         crosshairRadius)
                 elif event.key == pygame.K_BACKSPACE:
@@ -327,22 +326,17 @@ def settings(sens, targetColor, crosshairColor, crosshairRadius):
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     if sensInputButton.pressed():
-                        buttonSound.play()
                         sensInput.changeActivity()
                     elif targetRGBInputButton.pressed():
-                        buttonSound.play()
                         targetRGBInput.changeActivity()
                     elif crosshairRGBInputButton.pressed():
-                        buttonSound.play()
                         crosshairRGBInput.changeActivity()
                     elif crosshairRadiusInputButton.pressed():
-                        buttonSound.play()
                         crosshairRadiusInput.changeActivity()
                     elif homeButton.pressed():
                         buttonSound.play()
                         main(sens, targetColor, crosshairColor, crosshairRadius)
                     elif quitButton.pressed():
-                        buttonSound.play()
                         pygame.quit()
                     else:
                         #make sure all inputs are inactive
@@ -358,7 +352,7 @@ def settings(sens, targetColor, crosshairColor, crosshairRadius):
                         if temp.isdigit():
                             if isinstance(float(inputRect.input), 
                             float):
-                                sens = float(inputRect.input)
+                                sens = inputRect.input
                                 inputRect.clearInput()
                             else:
                                 inputRect.clearInput()
@@ -603,7 +597,7 @@ def sixshot(sens, targetColor, crosshairColor, crosshairRadius):
                 #mouse motion as well as locking mouse code from 
                 #https://stackoverflow.com/questions/47733992/lock-mouse-in-window-pygame
             elif event.type == pygame.MOUSEMOTION:
-                dx, dy = event.rel
+                (dx, dy) = event.rel
                 #find new looked at position
                 oldAngleX, oldAngleY = lookAngleX, lookAngleY
                 lookAngleX += .005*dy*sens
@@ -678,7 +672,7 @@ def gameOver(sens, targetColor, crosshairColor, crosshairRadius):
                         scoreReport = True
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    escape(sens, targetColor, crosshairColor, crosshairRadius)
+                    pause(sens, targetColor, crosshairColor, crosshairRadius)
         #Buttons
         screen.blit(quitButton.rect, (quitButton.left, 
         quitButton.top))

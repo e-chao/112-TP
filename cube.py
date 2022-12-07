@@ -1,4 +1,3 @@
-from cmu_112_graphics import *
 import math, random, copy
 
 class Cube():

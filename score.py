@@ -1,5 +1,3 @@
-from cmu_112_graphics import *
-
 class Score():
     def __init__(self):
         self.score = 0
